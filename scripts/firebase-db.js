@@ -15,9 +15,8 @@ function sendDeviceKeytoFirebase(key) {
   });
 }
 
-function removeDeviceKeyInFirebase() {
-  return db.ref().remove(
-).then(function() {
+function removeDeviceKeyInFirebase(userid) {
+  return db.ref(userid).remove().then(function() {
     console.log("They key has been deleted from Firebase DB");
   }).catch(function(error) {
     console.error('Deleting a key to server has been failed: ' + error);

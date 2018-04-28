@@ -26,6 +26,8 @@ var pushButton = document.querySelector('.js-push-btn');
 let isSubscribed = false;
 // 등록된 서비스워커 객체
 let swRegistration = null;
+let userid = '';
+
 
 if ('serviceWorker' in navigator && 'PushManager' in window) {
   console.log('Service Worker and Push is supported');
@@ -49,10 +51,10 @@ function initialiseUI() {
   pushButton.addEventListener('click', function() {
     pushButton.disabled = true;
     if (isSubscribed) {
-      // 브라우저가 등록되어 있으면 Push 
+      // 브라우저가 등록되어 있으면 firebase에서 삭제
       unSubscribeUser();
     } else {
-      // 브라우저가 등록되어 있지 않으면 
+      // 브라우저가 등록되어 있지 않으면 유저를 firebase에 등록
       subscribeUser();
     }
   });
@@ -62,7 +64,7 @@ function initialiseUI() {
     isSubscribed = !(subscription === null);
 
     if (isSubscribed) {
-      console.log('User IS subscribed.', subscription);
+      console.log('User IS subscribed.');
     } else {
       console.log('User is NOT subscribed.');
     }
@@ -108,14 +110,17 @@ function unSubscribeUser() {
 function updateSubscriptionOnServer(subscription, unsubscribed) {
   var subscriptionJson = document.querySelector('.js-subscription-json');
   var subscriptionDetails = document.querySelector('.js-subscription-details');
-
   if (subscription && !unsubscribed) {
     subscriptionJson.textContent = JSON.stringify(subscription);
     subscriptionDetails.classList.remove('is-invisible');
-    sendDeviceKeytoFirebase(subscription.endpoint.split('send/')[1]);
+    sendDeviceKeytoFirebase(subscription.endpoint.split('send/')[1]).then(function(result) {
+      userid = result;
+    });
   } else {
+    console.log(unsubscribed);
+    console.log(userid);
     subscriptionDetails.classList.add('is-invisible');
-    // removeDeviceKeyInFirebase();
+    removeDeviceKeyInFirebase(userid);
   }
 }
 
